@@ -1,15 +1,44 @@
+import 'package:chat_app/helpers/common.dart';
 import 'package:chat_app/helpers/style.dart';
+import 'package:chat_app/models/product.dart';
+import 'package:chat_app/provider/app.dart';
+import 'package:chat_app/provider/user.dart';
+import 'package:chat_app/screens/cart.dart';
+import 'package:chat_app/widgets/custom_text.dart';
+import 'package:chat_app/widgets/loading.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:transparent_image/transparent_image.dart';
 
 class ProductDetails extends StatefulWidget {
+  final ProductModel product;
+
+  const ProductDetails({Key key, this.product}) : super(key: key);
+
   @override
   _ProductDetailsState createState() => _ProductDetailsState();
 }
 
 class _ProductDetailsState extends State<ProductDetails> {
+  final _key = GlobalKey<ScaffoldState>();
+  String _color = "";
+  String _size = "";
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _color = widget.product.colors[0];
+    _size = widget.product.sizes[0];
+  }
+
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context);
+    final appProvider = Provider.of<AppProvider>(context);
+
     return Scaffold(
+      key: _key,
       body: SafeArea(
           child: Container(
         color: Colors.black.withOpacity(0.9),
@@ -17,10 +46,19 @@ class _ProductDetailsState extends State<ProductDetails> {
           children: <Widget>[
             Stack(
               children: <Widget>[
-                Image.asset(
-                  "images/m1.jpeg",
-                  height: 350,
-                  fit: BoxFit.cover,
+                Positioned.fill(
+                    child: Align(
+                  alignment: Alignment.center,
+                  child: Loading(),
+                )),
+                Center(
+                  child: FadeInImage.memoryNetwork(
+                    placeholder: kTransparentImage,
+                    image: widget.product.picture,
+                    fit: BoxFit.fill,
+                    height: 400,
+                    width: double.infinity,
+                  ),
                 ),
                 Align(
                   alignment: Alignment.topCenter,
@@ -50,7 +88,7 @@ class _ProductDetailsState extends State<ProductDetails> {
                 Align(
                   alignment: Alignment.bottomCenter,
                   child: Container(
-                      height: 352,
+                      height: 400,
                       decoration: BoxDecoration(
                         // Box decoration takes a gradient
                         gradient: LinearGradient(
@@ -84,7 +122,7 @@ class _ProductDetailsState extends State<ProductDetails> {
                           Padding(
                             padding: const EdgeInsets.all(10.0),
                             child: Text(
-                              'Product Blazer',
+                              widget.product.name,
                               style: TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.w300,
@@ -94,7 +132,7 @@ class _ProductDetailsState extends State<ProductDetails> {
                           Padding(
                             padding: const EdgeInsets.all(10.0),
                             child: Text(
-                              '\$35.99',
+                              '\$${widget.product.price / 100}',
                               textAlign: TextAlign.end,
                               style: TextStyle(
                                   color: Colors.white,
@@ -111,8 +149,7 @@ class _ProductDetailsState extends State<ProductDetails> {
                     alignment: Alignment.centerLeft,
                     child: InkWell(
                       onTap: () {
-                        print("CLICKED");
-                        Navigator.pop(context);
+                        changeScreen(context, CartScreen());
                       },
                       child: Padding(
                           padding: const EdgeInsets.all(4),
@@ -173,151 +210,70 @@ class _ProductDetailsState extends State<ProductDetails> {
                 child: Column(
                   children: <Widget>[
                     Padding(
-                      padding: const EdgeInsets.all(4.0),
+                      padding: const EdgeInsets.all(0),
                       child: Row(
                         children: <Widget>[
                           Padding(
-                            padding: const EdgeInsets.all(4.0),
-                            child: Text(
-                              'Select Color: ',
-                              style: TextStyle(color: Colors.white),
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            child: CustomText(
+                              text: "Select a Color",
+                              color: white,
                             ),
                           ),
                           Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Container(
-                              width: 24,
-                              height: 24,
-                              decoration: BoxDecoration(
-                                  color: Colors.black,
-                                  borderRadius: BorderRadius.circular(15)),
-                              child: Padding(
-                                padding: const EdgeInsets.all(2),
-                                child: CircleAvatar(
-                                  backgroundColor: Colors.red,
-                                ),
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Container(
-                              width: 24,
-                              height: 24,
-                              decoration: BoxDecoration(
-                                  color: Colors.black,
-                                  borderRadius: BorderRadius.circular(15)),
-                              child: Padding(
-                                padding: const EdgeInsets.all(2),
-                                child: CircleAvatar(
-                                  backgroundColor: Colors.green,
-                                ),
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Container(
-                              width: 24,
-                              height: 24,
-                              decoration: BoxDecoration(
-                                  color: Colors.black,
-                                  borderRadius: BorderRadius.circular(15)),
-                              child: Padding(
-                                padding: const EdgeInsets.all(2),
-                                child: CircleAvatar(
-                                  backgroundColor: Colors.orange,
-                                ),
-                              ),
-                            ),
-                          ),
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            child: DropdownButton<String>(
+                                value: _color,
+                                style: TextStyle(color: white),
+                                items: widget.product.colors
+                                    .map<DropdownMenuItem<String>>(
+                                        (value) => DropdownMenuItem(
+                                            value: value,
+                                            child: CustomText(
+                                              text: value,
+                                              color: red,
+                                            )))
+                                    .toList(),
+                                onChanged: (value) {
+                                  setState(() {
+                                    _color = value;
+                                  });
+                                }),
+                          )
                         ],
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.all(8.0),
+                      padding: const EdgeInsets.all(0),
                       child: Row(
                         children: <Widget>[
                           Padding(
-                            padding: const EdgeInsets.all(4.0),
-                            child: Text('Select Size: ',
-                                style: TextStyle(color: Colors.white)),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Container(
-                              width: 24,
-                              height: 24,
-                              decoration: BoxDecoration(
-                                  color: Colors.black.withOpacity(0.8),
-                                  borderRadius: BorderRadius.circular(7)),
-                              child: Padding(
-                                padding: const EdgeInsets.all(2),
-                                child: Text(
-                                  'S',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                      color: Colors.white, fontSize: 17),
-                                ),
-                              ),
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            child: CustomText(
+                              text: "Select a Size",
+                              color: white,
                             ),
                           ),
                           Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Container(
-                              width: 24,
-                              height: 24,
-                              decoration: BoxDecoration(
-                                  color: Colors.black.withOpacity(0.8),
-                                  borderRadius: BorderRadius.circular(7)),
-                              child: Padding(
-                                padding: const EdgeInsets.all(2),
-                                child: Text(
-                                  'M',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                      color: Colors.white, fontSize: 17),
-                                ),
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Container(
-                              width: 24,
-                              height: 24,
-                              decoration: BoxDecoration(
-                                  color: Colors.black.withOpacity(0.8),
-                                  borderRadius: BorderRadius.circular(7)),
-                              child: Padding(
-                                padding: const EdgeInsets.all(2),
-                                child: Text(
-                                  'L',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                      color: Colors.white, fontSize: 17),
-                                ),
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Container(
-                              height: 24,
-                              decoration: BoxDecoration(
-                                  color: Colors.black.withOpacity(0.8),
-                                  borderRadius: BorderRadius.circular(7)),
-                              child: Padding(
-                                padding: const EdgeInsets.all(2),
-                                child: Text(
-                                  'XL',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                      color: Colors.white, fontSize: 17),
-                                ),
-                              ),
-                            ),
-                          ),
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            child: DropdownButton<String>(
+                                value: _size,
+                                style: TextStyle(color: white),
+                                items: widget.product.sizes
+                                    .map<DropdownMenuItem<String>>(
+                                        (value) => DropdownMenuItem(
+                                            value: value,
+                                            child: CustomText(
+                                              text: value,
+                                              color: red,
+                                            )))
+                                    .toList(),
+                                onChanged: (value) {
+                                  setState(() {
+                                    _size = value;
+                                  });
+                                }),
+                          )
                         ],
                       ),
                     ),
@@ -336,16 +292,36 @@ class _ProductDetailsState extends State<ProductDetails> {
                           color: Colors.white,
                           elevation: 0.0,
                           child: MaterialButton(
-                            onPressed: () {},
+                            onPressed: () async {
+                              appProvider.changeIsLoading();
+                              bool success = await userProvider.addToCart(
+                                  product: widget.product,
+                                  color: _color,
+                                  size: _size);
+                              if (success) {
+                                _key.currentState.showSnackBar(
+                                    SnackBar(content: Text("Added to Cart!")));
+                                userProvider.reloadUserModel();
+                                appProvider.changeIsLoading();
+                                return;
+                              } else {
+                                _key.currentState.showSnackBar(SnackBar(
+                                    content: Text("Not added to Cart!")));
+                                appProvider.changeIsLoading();
+                                return;
+                              }
+                            },
                             minWidth: MediaQuery.of(context).size.width,
-                            child: Text(
-                              "Add to cart",
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 20.0),
-                            ),
+                            child: appProvider.isLoading
+                                ? Loading()
+                                : Text(
+                                    "Add to cart",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 20.0),
+                                  ),
                           )),
                     ),
                     SizedBox(

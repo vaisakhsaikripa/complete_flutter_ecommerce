@@ -21,7 +21,7 @@ class ProductModel {
   String _category;
   String _brand;
   int _quantity;
-  double _price;
+  int _price;
   bool _sale;
   bool _featured;
   List _colors;
@@ -41,7 +41,7 @@ class ProductModel {
 
   int get quantity => _quantity;
 
-  double get price => _price;
+  int get price => _price;
 
   bool get featured => _featured;
 
@@ -53,16 +53,16 @@ class ProductModel {
 
   ProductModel.fromSnapshot(DocumentSnapshot snapshot) {
     _id = snapshot.data[ID];
-    _price = snapshot.data[PRICE];
     _brand = snapshot.data[BRAND];
     _sale = snapshot.data[SALE];
-    _description = snapshot.data[DESCRIPTION];
-    _id = snapshot.data[ID];
+    _description = snapshot.data[DESCRIPTION] ?? " ";
     _featured = snapshot.data[FEATURED];
     _price = snapshot.data[PRICE].floor();
     _category = snapshot.data[CATEGORY];
     _colors = snapshot.data[COLORS];
     _sizes = snapshot.data[SIZES];
     _name = snapshot.data[NAME];
+    _picture = snapshot.data[PICTURE];
+
   }
 }
